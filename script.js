@@ -19,68 +19,26 @@ let speechTimer = null;
 let clickCount = 0;
 let clickResetTimer = null;
 
-// 拖拽
-pet.addEventListener('mousedown', e => {
-    drag = true;
-    offX = e.clientX - pet.offsetLeft;
-    offY = e.clientY - pet.offsetTop;
-    pet.style.cursor = 'grabbing';
-    resetIdle();
-});
+// ===== 新增：位置与自动走路 =====
+let petX = window.innerWidth * 0.3;
+let petY = window.innerHeight * 0.3;
 
-document.addEventListener('mousemove', e => {
-    if (!drag) return;
-    pet.style.left = e.clientX - offX + 'px';
-    pet.style.top = e.clientY - offY + 'px';
-    updateToastPosition();
-});
+let walkTimer = null;
+let stopWalkTimeout = null;
+let isWalking = false;
+let walkDirection = 1; // 1 = 向右，-1 = 向左
+let walkSpeed = 2;
 
-document.addEventListener('mouseup', () => {
-    drag = false;
-    pet.style.cursor = 'grab';
-});
-
-// 右键菜单
-pet.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    menu.style.display = 'block';
-    menu.style.left = e.clientX + 'px';
-    menu.style.top = e.clientY + 'px';
-    resetIdle();
-});
-
-document.addEventListener('click', e => {
-    if (e.target !== pet) {
-        menu.style.display = 'none';
-    }
-});
-
-// 疯狂点击隐藏彩蛋
-// 1 秒内点 5 次 => 炸毛
-pet.addEventListener('click', () => {
-    resetIdle();
-
-    clickCount++;
-
-    if (clickResetTimer) {
-        clearTimeout(clickResetTimer);
-    }
-
-    clickResetTimer = setTimeout(() => {
-        clickCount = 0;
-        clickResetTimer = null;
-    }, 1000);
-
-    if (clickCount >= 5) {
-        clickCount = 0;
-        dizzyEasterEgg();
-    }
-});
-
-// 对话气泡
+// ===== 对话气泡位置 =====
 function updateToastPosition() {
-    clockToast.style.left = pet.offsetLeft + 90 + 'px';
-    clockToast.style.top = pet.offsetTop - 20 + 'px';
+    clockToast.style.left = petX + 90 + 'px';
+    clockToast.style.top = petY - 20 + 'px';
+}
+
+function syncPetPosition() {
+    pet.style.left = petX + 'px';
+    pet.style.top = petY + 'px';
+    updateToastPosition();
 }
 
 function hideToast() {
@@ -108,7 +66,143 @@ function speak(text, ms = 3000) {
     }, ms);
 }
 
-// 只更新数值UI
+// ===== 新增：自动走路 =====
+function stopWalking() {
+    if (walkTimer) {
+        clearInterval(walkTimer);
+        walkTimer = null;
+    }
+    if (stopWalkTimeout) {
+        clearTimeout(stopWalkTimeout);
+        stopWalkTimeout = null;
+    }
+
+    isWalking = false;
+
+    if (!isDead && !isAction) {
+        updateUI();
+    }
+}
+
+function startWalking(duration = 4000) {
+    if (isDead || isAction || drag || !petVisible || isWalking) return;
+
+    isWalking = true;
+    pet.className = 'pet walkdog';
+
+    walkTimer = setInterval(() => {
+        if (isDead || isAction || drag || !petVisible) {
+            stopWalking();
+            return;
+        }
+
+        petX += walkDirection * walkSpeed;
+
+        const maxX = window.innerWidth - 200;
+        const maxY = window.innerHeight - 200;
+
+        if (petX <= 0) {
+            petX = 0;
+            walkDirection = 1;
+        } else if (petX >= maxX) {
+            petX = maxX;
+            walkDirection = -1;
+        }
+
+        if (petY < 0) petY = 0;
+        if (petY > maxY) petY = maxY;
+
+        syncPetPosition();
+    }, 40);
+
+    stopWalkTimeout = setTimeout(() => {
+        stopWalking();
+    }, duration);
+}
+
+function randomWalkChance() {
+    if (isDead || isAction || drag || !petVisible || isWalking) return;
+
+    const chance = Math.random();
+
+    if (chance < 0.65) {
+        walkDirection = Math.random() < 0.5 ? -1 : 1;
+        const duration = 3000 + Math.random() * 4000; // 3~7 秒
+        startWalking(duration);
+    } else {
+        autoBehavior();
+    }
+}
+
+// ===== 拖拽 =====
+pet.addEventListener('mousedown', e => {
+    stopWalking();
+    drag = true;
+    offX = e.clientX - petX;
+    offY = e.clientY - petY;
+    pet.style.cursor = 'grabbing';
+    resetIdle();
+});
+
+document.addEventListener('mousemove', e => {
+    if (!drag) return;
+
+    petX = e.clientX - offX;
+    petY = e.clientY - offY;
+
+    const maxX = window.innerWidth - 200;
+    const maxY = window.innerHeight - 200;
+
+    if (petX < 0) petX = 0;
+    if (petX > maxX) petX = maxX;
+    if (petY < 0) petY = 0;
+    if (petY > maxY) petY = maxY;
+
+    syncPetPosition();
+});
+
+document.addEventListener('mouseup', () => {
+    drag = false;
+    pet.style.cursor = 'grab';
+});
+
+// ===== 右键菜单 =====
+pet.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    menu.style.display = 'block';
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    resetIdle();
+});
+
+document.addEventListener('click', e => {
+    if (e.target !== pet) {
+        menu.style.display = 'none';
+    }
+});
+
+// ===== 疯狂点击隐藏彩蛋 =====
+pet.addEventListener('click', () => {
+    resetIdle();
+
+    clickCount++;
+
+    if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+    }
+
+    clickResetTimer = setTimeout(() => {
+        clickCount = 0;
+        clickResetTimer = null;
+    }, 1000);
+
+    if (clickCount >= 5) {
+        clickCount = 0;
+        dizzyEasterEgg();
+    }
+});
+
+// ===== 只更新数值UI =====
 function updateBarsOnly() {
     document.getElementById('happiness-bar').style.width = happiness + '%';
     document.getElementById('energy-bar').style.width = energy + '%';
@@ -116,15 +210,15 @@ function updateBarsOnly() {
     document.getElementById('energy-text').innerText = energy;
 }
 
-// 更新整体UI
+// ===== 更新整体UI =====
 function updateUI() {
     updateBarsOnly();
     updateState();
 }
 
-// 状态动画
+// ===== 状态动画 =====
 function updateState() {
-    if (isAction) return;
+    if (isAction || isWalking) return;
 
     if (isDead) {
         pet.className = 'pet dead';
@@ -161,21 +255,21 @@ function updateState() {
     pet.className = 'pet ' + randomState;
 }
 
-// 长时间不理 => boring 彩蛋
+// ===== 长时间不理 =====
 function resetIdle() {
     if (idleTimer) {
         clearTimeout(idleTimer);
     }
 
     idleTimer = setTimeout(() => {
-        if (!isDead && !isAction) {
+        if (!isDead && !isAction && !isWalking) {
             pet.className = 'pet boring';
             speak('小白，你怎么不理我啦……', 3000);
         }
     }, 60000);
 }
 
-// 自动掉属性
+// ===== 自动掉属性 =====
 setInterval(() => {
     if (isDead) return;
 
@@ -184,13 +278,18 @@ setInterval(() => {
     updateUI();
 }, 10000);
 
-// 整点报时
+// ===== 整点报时 =====
 setInterval(() => {
     const now = new Date();
     if (now.getMinutes() === 0 && now.getSeconds() === 0) {
         showClock(now.getHours());
     }
 }, 1000);
+
+// ===== 每 10 秒尝试自动行动/散步 =====
+setInterval(() => {
+    randomWalkChance();
+}, 10000);
 
 function clearCurrentAction() {
     if (actionTimer) {
@@ -206,6 +305,7 @@ function clearCurrentAction() {
 function showClock(h) {
     if (isDead) return;
 
+    stopWalking();
     clearCurrentAction();
     isAction = true;
     pet.className = 'pet clock';
@@ -220,9 +320,10 @@ function showClock(h) {
     }, 9500);
 }
 
-// 死亡
+// ===== 死亡 =====
 function petDie() {
     isDead = true;
+    stopWalking();
     clearCurrentAction();
     hideToast();
     pet.className = 'pet dead';
@@ -237,19 +338,20 @@ function petDie() {
     }, 30000);
 }
 
-// 随机位置
+// ===== 随机位置 =====
 function randomPos() {
     const w = window.innerWidth - 200;
     const h = window.innerHeight - 200;
-    pet.style.left = Math.random() * w + 'px';
-    pet.style.top = Math.random() * h + 'px';
-    updateToastPosition();
+    petX = Math.random() * w;
+    petY = Math.random() * h;
+    syncPetPosition();
 }
 
-// 通用动作函数
+// ===== 通用动作函数 =====
 function act(gif, hp, en, ms, text = '') {
     if (isDead) return;
 
+    stopWalking();
     clearCurrentAction();
     isAction = true;
     pet.className = 'pet ' + gif;
@@ -272,10 +374,11 @@ function act(gif, hp, en, ms, text = '') {
     }, ms);
 }
 
-// 疯狂点击彩蛋函数
+// ===== 疯狂点击彩蛋 =====
 function dizzyEasterEgg() {
     if (isDead) return;
 
+    stopWalking();
     clearCurrentAction();
     isAction = true;
     pet.className = 'pet caidan';
@@ -293,9 +396,9 @@ function dizzyEasterEgg() {
     }, 3000);
 }
 
-// 宠物自动行动
+// ===== 宠物自动行为 =====
 function autoBehavior() {
-    if (isDead || isAction || drag || !petVisible) return;
+    if (isDead || isAction || drag || !petVisible || isWalking) return;
 
     const autoActions = [
         {
@@ -309,11 +412,6 @@ function autoBehavior() {
             ms: 3500
         },
         {
-            gif: 'walkdog',
-            text: '我自己去遛达一下～',
-            ms: 5000
-        },
-        {
             gif: 'appear',
             text: '嘿嘿，我换个地方出现！',
             ms: 3500,
@@ -323,6 +421,7 @@ function autoBehavior() {
 
     const a = autoActions[Math.floor(Math.random() * autoActions.length)];
 
+    stopWalking();
     clearCurrentAction();
     isAction = true;
     pet.className = 'pet ' + a.gif;
@@ -342,12 +441,7 @@ function autoBehavior() {
     }, a.ms);
 }
 
-// 每 18 秒尝试自动行动一次
-setInterval(() => {
-    autoBehavior();
-}, 18000);
-
-// 所有互动功能
+// ===== 所有互动功能 =====
 function stick() {
     act('stick', 15, -5, 6000, '贴贴最开心啦～');
 }
@@ -383,6 +477,7 @@ function baji2() {
 function appear() {
     if (isDead) return;
 
+    stopWalking();
     clearCurrentAction();
     isAction = true;
     pet.className = 'pet appear';
@@ -414,6 +509,7 @@ function toggleHide() {
     pet.style.opacity = petVisible ? '1' : '0';
 
     if (!petVisible) {
+        stopWalking();
         hideToast();
     } else {
         speak('我回来啦！', 2000);
@@ -422,8 +518,19 @@ function toggleHide() {
     resetIdle();
 }
 
-window.addEventListener('resize', updateToastPosition);
+window.addEventListener('resize', () => {
+    const maxX = window.innerWidth - 200;
+    const maxY = window.innerHeight - 200;
 
-// 初始化
+    if (petX > maxX) petX = maxX;
+    if (petY > maxY) petY = maxY;
+    if (petX < 0) petX = 0;
+    if (petY < 0) petY = 0;
+
+    syncPetPosition();
+});
+
+// ===== 初始化 =====
+syncPetPosition();
 updateUI();
 resetIdle();
