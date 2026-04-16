@@ -88,7 +88,7 @@ function startWalking(duration = 4000) {
     if (isDead || isAction || drag || !petVisible || isWalking) return;
 
     isWalking = true;
-    pet.className = 'pet walkdog';
+    pet.className = 'pet working2';
 
     walkTimer = setInterval(() => {
         if (isDead || isAction || drag || !petVisible) {
