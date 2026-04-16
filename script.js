@@ -12,6 +12,11 @@ let isAction = false;
 let drag = false, offX, offY;
 let actionTimer = null;
 let clockTimer = null;
+let idleTimer = null;
+
+// 疯狂点击彩蛋
+let clickCount = 0;
+let clickResetTimer = null;
 
 // 拖拽
 pet.addEventListener('mousedown', e => {
@@ -19,6 +24,7 @@ pet.addEventListener('mousedown', e => {
     offX = e.clientX - pet.offsetLeft;
     offY = e.clientY - pet.offsetTop;
     pet.style.cursor = 'grabbing';
+    resetIdle();
 });
 
 document.addEventListener('mousemove', e => {
@@ -38,10 +44,35 @@ pet.addEventListener('contextmenu', e => {
     menu.style.display = 'block';
     menu.style.left = e.clientX + 'px';
     menu.style.top = e.clientY + 'px';
+    resetIdle();
 });
 
-document.addEventListener('click', () => {
-    menu.style.display = 'none';
+document.addEventListener('click', e => {
+    if (e.target !== pet) {
+        menu.style.display = 'none';
+    }
+});
+
+// 疯狂点击隐藏彩蛋
+// 1 秒内点 5 次 => 晕了
+pet.addEventListener('click', () => {
+    resetIdle();
+
+    clickCount++;
+
+    if (clickResetTimer) {
+        clearTimeout(clickResetTimer);
+    }
+
+    clickResetTimer = setTimeout(() => {
+        clickCount = 0;
+        clickResetTimer = null;
+    }, 1000);
+
+    if (clickCount >= 5) {
+        clickCount = 0;
+        dizzyEasterEgg();
+    }
 });
 
 // 只更新数值UI
@@ -97,6 +128,19 @@ function updateState() {
     pet.className = 'pet ' + randomState;
 }
 
+// 长时间不理 => boring 彩蛋
+function resetIdle() {
+    if (idleTimer) {
+        clearTimeout(idleTimer);
+    }
+
+    idleTimer = setTimeout(() => {
+        if (!isDead && !isAction) {
+            pet.className = 'pet boring';
+        }
+    }, 60000);
+}
+
 // 自动掉属性
 setInterval(() => {
     if (isDead) return;
@@ -143,6 +187,7 @@ function showClock(h) {
         isAction = false;
         clockTimer = null;
         updateUI();
+        resetIdle();
     }, 9500);
 }
 
@@ -157,6 +202,7 @@ function petDie() {
         happiness = 30;
         energy = 30;
         updateUI();
+        resetIdle();
     }, 30000);
 }
 
@@ -180,12 +226,35 @@ function act(gif, hp, en, ms) {
     energy = Math.min(100, Math.max(0, energy + en));
 
     updateBarsOnly();
+    resetIdle();
 
     actionTimer = setTimeout(() => {
         isAction = false;
         actionTimer = null;
         updateUI();
+        resetIdle();
     }, ms);
+}
+
+// 疯狂点击彩蛋函数
+function dizzyEasterEgg() {
+    if (isDead) return;
+
+    clearCurrentAction();
+    isAction = true;
+    pet.className = 'pet crying';
+
+    updateBarsOnly();
+    resetIdle();
+
+    alert('晕了晕了！不要再戳我啦！');
+
+    actionTimer = setTimeout(() => {
+        isAction = false;
+        actionTimer = null;
+        updateUI();
+        resetIdle();
+    }, 3000);
 }
 
 // 所有互动功能
@@ -229,11 +298,13 @@ function appear() {
     pet.className = 'pet appear';
     randomPos();
     updateBarsOnly();
+    resetIdle();
 
     actionTimer = setTimeout(() => {
         isAction = false;
         actionTimer = null;
         updateUI();
+        resetIdle();
     }, 3500);
 }
 
@@ -244,12 +315,15 @@ function walkDog() {
 function toggleStats() {
     statsVisible = !statsVisible;
     document.getElementById('status-panel').style.display = statsVisible ? 'block' : 'none';
+    resetIdle();
 }
 
 function toggleHide() {
     petVisible = !petVisible;
     pet.style.opacity = petVisible ? '1' : '0';
+    resetIdle();
 }
 
 // 初始化
 updateUI();
+resetIdle();
