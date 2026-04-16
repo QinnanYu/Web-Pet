@@ -41,6 +41,7 @@ body {
 .pet.clock      { background-image: url('GIF/clock.gif'); }
 .pet.boring     { background-image: url('GIF/boring.gif'); }
 .pet.dead       { background-image: url('GIF/crying.gif'); }
+.pet.caidan     { background-image: url('GIF/caidan.gif'); }
 
 #status-panel {
     position: fixed;
