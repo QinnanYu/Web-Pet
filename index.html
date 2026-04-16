@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FXZ pet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="pet" class="pet normal"></div>
+
+<div id="status-panel">
+    <div class="stat-row">
+        <span>幸福值:</span>
+        <div class="bar-bg"><div id="happiness-bar" class="bar-fill"></div></div>
+        <span id="happiness-text">100</span>
+    </div>
+    <div class="stat-row">
+        <span>能量值:</span>
+        <div class="bar-bg"><div id="energy-bar" class="bar-fill"></div></div>
+        <span id="energy-text">100</span>
+    </div>
+</div>
+
+<div id="right-menu" class="menu">
+    <div class="item" onclick="stick()">🥰 贴贴</div>
+    <div class="item" onclick="call()">👋 拍一拍</div>
+    <div class="item" onclick="exercise()">🏃 锻炼</div>
+    <div class="item" onclick="charge()">🔋 充电</div>
+    <div class="item" onclick="cake()">🍰 投喂</div>
+    <div class="item" onclick="baji()">🍗 吧唧</div>
+    <div class="item" onclick="baji2()">🍢 嘬鸡毛</div>
+    <div class="item" onclick="appear()">✨ 随机出现</div>
+    <div class="item" onclick="walkDog()">🐾 遛小鸡毛</div>
+    <div class="item" onclick="toggleStats()">📊 显示/隐藏状态栏</div>
+    <div class="item" onclick="toggleHide()">👁️ 显示/隐藏宠物</div>
+</div>
+
+<div id="clock-toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
