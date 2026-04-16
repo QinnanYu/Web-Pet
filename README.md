@@ -92,18 +92,7 @@ dead（死亡）
 👁️ 显示控制
 显示 / 隐藏宠物
 显示 / 隐藏状态栏
-🖼️ 项目结构
-FXZ-Pet/
-│── index.html
-│── style.css
-│── script.js
-│
-├── GIF/
-│   ├── normal.gif
-│   ├── crying.gif
-│   ├── caidan.gif
-│   ├── ...
-│   └── jia.png   (背景图)
+
 🛠️ 技术实现
 HTML：页面结构
 CSS：
@@ -144,8 +133,7 @@ live-server
 气泡式交互（更真实）
 丰富的互动与彩蛋机制
 👤 作者
-
-Flora
+Qinnan Yu
 
 📌 说明
 
