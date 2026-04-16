@@ -242,12 +242,12 @@ function dizzyEasterEgg() {
 
     clearCurrentAction();
     isAction = true;
-    pet.className = 'pet crying';
+    pet.className = 'pet caidan';
 
     updateBarsOnly();
     resetIdle();
 
-    alert('晕了晕了！不要再戳我啦！');
+    alert('小白 我被rua炸毛啦！！');
 
     actionTimer = setTimeout(() => {
         isAction = false;
