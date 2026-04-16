@@ -13,6 +13,7 @@ let drag = false, offX, offY;
 let actionTimer = null;
 let clockTimer = null;
 let idleTimer = null;
+let speechTimer = null;
 
 // 疯狂点击彩蛋
 let clickCount = 0;
@@ -31,6 +32,7 @@ document.addEventListener('mousemove', e => {
     if (!drag) return;
     pet.style.left = e.clientX - offX + 'px';
     pet.style.top = e.clientY - offY + 'px';
+    updateToastPosition();
 });
 
 document.addEventListener('mouseup', () => {
@@ -54,7 +56,7 @@ document.addEventListener('click', e => {
 });
 
 // 疯狂点击隐藏彩蛋
-// 1 秒内点 5 次 => 晕了
+// 1 秒内点 5 次 => 炸毛
 pet.addEventListener('click', () => {
     resetIdle();
 
@@ -74,6 +76,37 @@ pet.addEventListener('click', () => {
         dizzyEasterEgg();
     }
 });
+
+// 对话气泡
+function updateToastPosition() {
+    clockToast.style.left = pet.offsetLeft + 90 + 'px';
+    clockToast.style.top = pet.offsetTop - 20 + 'px';
+}
+
+function hideToast() {
+    clockToast.style.display = 'none';
+    if (speechTimer) {
+        clearTimeout(speechTimer);
+        speechTimer = null;
+    }
+}
+
+function speak(text, ms = 3000) {
+    if (isDead || !petVisible) return;
+
+    if (speechTimer) {
+        clearTimeout(speechTimer);
+    }
+
+    clockToast.innerText = text;
+    updateToastPosition();
+    clockToast.style.display = 'block';
+
+    speechTimer = setTimeout(() => {
+        clockToast.style.display = 'none';
+        speechTimer = null;
+    }, ms);
+}
 
 // 只更新数值UI
 function updateBarsOnly() {
@@ -137,6 +170,7 @@ function resetIdle() {
     idleTimer = setTimeout(() => {
         if (!isDead && !isAction) {
             pet.className = 'pet boring';
+            speak('小白，你怎么不理我啦……', 3000);
         }
     }, 60000);
 }
@@ -167,7 +201,6 @@ function clearCurrentAction() {
         clearTimeout(clockTimer);
         clockTimer = null;
     }
-    clockToast.style.display = 'none';
 }
 
 function showClock(h) {
@@ -177,13 +210,9 @@ function showClock(h) {
     isAction = true;
     pet.className = 'pet clock';
 
-    clockToast.innerText = `现在是 ${h} 点整噢！`;
-    clockToast.style.display = 'block';
-    clockToast.style.left = pet.offsetLeft + 80 + 'px';
-    clockToast.style.top = pet.offsetTop - 40 + 'px';
+    speak(`现在是 ${h} 点整噢！`, 9500);
 
     clockTimer = setTimeout(() => {
-        clockToast.style.display = 'none';
         isAction = false;
         clockTimer = null;
         updateUI();
@@ -195,6 +224,7 @@ function showClock(h) {
 function petDie() {
     isDead = true;
     clearCurrentAction();
+    hideToast();
     pet.className = 'pet dead';
 
     setTimeout(() => {
@@ -202,6 +232,7 @@ function petDie() {
         happiness = 30;
         energy = 30;
         updateUI();
+        speak('我又活过来啦！', 3000);
         resetIdle();
     }, 30000);
 }
@@ -212,10 +243,11 @@ function randomPos() {
     const h = window.innerHeight - 200;
     pet.style.left = Math.random() * w + 'px';
     pet.style.top = Math.random() * h + 'px';
+    updateToastPosition();
 }
 
 // 通用动作函数
-function act(gif, hp, en, ms) {
+function act(gif, hp, en, ms, text = '') {
     if (isDead) return;
 
     clearCurrentAction();
@@ -227,6 +259,10 @@ function act(gif, hp, en, ms) {
 
     updateBarsOnly();
     resetIdle();
+
+    if (text) {
+        speak(text, Math.min(ms, 3000));
+    }
 
     actionTimer = setTimeout(() => {
         isAction = false;
@@ -247,7 +283,7 @@ function dizzyEasterEgg() {
     updateBarsOnly();
     resetIdle();
 
-    alert('小白 我被rua炸毛啦！！');
+    speak('小白，我被rua炸毛啦！！', 3000);
 
     actionTimer = setTimeout(() => {
         isAction = false;
@@ -257,37 +293,91 @@ function dizzyEasterEgg() {
     }, 3000);
 }
 
+// 宠物自动行动
+function autoBehavior() {
+    if (isDead || isAction || drag || !petVisible) return;
+
+    const autoActions = [
+        {
+            gif: 'normal2',
+            text: '小白，我在发呆哦~',
+            ms: 3000
+        },
+        {
+            gif: 'working2',
+            text: '今天也要认真营业！',
+            ms: 3500
+        },
+        {
+            gif: 'walkdog',
+            text: '我自己去遛达一下～',
+            ms: 5000
+        },
+        {
+            gif: 'appear',
+            text: '嘿嘿，我换个地方出现！',
+            ms: 3500,
+            move: true
+        }
+    ];
+
+    const a = autoActions[Math.floor(Math.random() * autoActions.length)];
+
+    clearCurrentAction();
+    isAction = true;
+    pet.className = 'pet ' + a.gif;
+
+    if (a.move) {
+        randomPos();
+    }
+
+    speak(a.text, 2500);
+    resetIdle();
+
+    actionTimer = setTimeout(() => {
+        isAction = false;
+        actionTimer = null;
+        updateUI();
+        resetIdle();
+    }, a.ms);
+}
+
+// 每 18 秒尝试自动行动一次
+setInterval(() => {
+    autoBehavior();
+}, 18000);
+
 // 所有互动功能
 function stick() {
-    act('stick', 15, -5, 6000);
+    act('stick', 15, -5, 6000, '贴贴最开心啦～');
 }
 
 function call() {
-    act('call', 0, 0, 2000);
+    act('call', 0, 0, 2000, '拍拍我干嘛呀？');
 }
 
 function exercise() {
-    act('exercise', 5, -15, 6000);
+    act('exercise', 5, -15, 6000, '运动一下更有精神！');
 }
 
 function charge() {
-    act('charge', 30, 30, 6000);
+    act('charge', 30, 30, 6000, '充电中，请勿打扰～');
 }
 
 function cake() {
     if (energy >= 80) {
-        act('full', 0, 0, 3000);
+        act('full', 0, 0, 3000, '吃不下啦，肚肚圆圆！');
     } else {
-        act('cake', 10, 5, 4000);
+        act('cake', 10, 5, 4000, '好耶，有好吃的！');
     }
 }
 
 function baji() {
-    act('baji', 10, 0, 4000);
+    act('baji', 10, 0, 4000, '吧唧吧唧，真香！');
 }
 
 function baji2() {
-    act('baji2', 15, -10, 4000);
+    act('baji2', 15, -10, 4000, '小白，这个也好吃！');
 }
 
 function appear() {
@@ -298,6 +388,7 @@ function appear() {
     pet.className = 'pet appear';
     randomPos();
     updateBarsOnly();
+    speak('锵锵！我又出现啦！', 2500);
     resetIdle();
 
     actionTimer = setTimeout(() => {
@@ -309,7 +400,7 @@ function appear() {
 }
 
 function walkDog() {
-    act('walkdog', 15, -10, 6000);
+    act('walkdog', 15, -10, 6000, '出去散散步～');
 }
 
 function toggleStats() {
@@ -321,8 +412,17 @@ function toggleStats() {
 function toggleHide() {
     petVisible = !petVisible;
     pet.style.opacity = petVisible ? '1' : '0';
+
+    if (!petVisible) {
+        hideToast();
+    } else {
+        speak('我回来啦！', 2000);
+    }
+
     resetIdle();
 }
+
+window.addEventListener('resize', updateToastPosition);
 
 // 初始化
 updateUI();
