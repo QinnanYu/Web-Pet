@@ -443,7 +443,7 @@ function autoBehavior() {
 
 // ===== 所有互动功能 =====
 function stick() {
-    act('stick', 15, -5, 6000, '贴贴最开心啦');
+    act('stick', 15, -5, 6000, '小白贴贴~');
 }
 
 function call() {
@@ -451,7 +451,7 @@ function call() {
 }
 
 function exercise() {
-    act('exercise', 5, -15, 6000, '运动一下更有精神喔');
+    act('exercise', 5, -15, 6000, '嘿哈嘿哈');
 }
 
 function charge() {
