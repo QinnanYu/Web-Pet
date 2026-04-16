@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: url('GIF/jia.img') no-repeat center center fixed;
+    background: url('GIF/jia.png') no-repeat center center fixed;
     background-size: cover;
     background-color: #fdf6ee;
     user-select: none;
