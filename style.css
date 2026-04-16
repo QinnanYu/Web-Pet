@@ -2,8 +2,9 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: url('GIF/jia.png') no-repeat center center fixed;
+    background: url('GIF/jia.img') no-repeat center center fixed;
     background-size: cover;
+    background-color: #fdf6ee;
     user-select: none;
 }
 
@@ -104,11 +105,17 @@ body {
 
 #clock-toast {
     position: fixed;
-    background: white;
+    background: rgba(255,255,255,0.96);
     border: 2px solid #FF69B4;
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 10px 14px;
     font-size: 14px;
+    line-height: 1.4;
+    color: #444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 99999;
     display: none;
+    max-width: 220px;
+    word-break: break-word;
+    pointer-events: none;
 }
