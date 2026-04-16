@@ -408,12 +408,12 @@ function autoBehavior() {
         },
         {
             gif: 'working2',
-            text: '今天也要认真营业！',
+            text: '遛遛',
             ms: 3500
         },
         {
             gif: 'appear',
-            text: '嘿嘿，我换个地方出现！',
+            text: '嘿嘿，猜猜我从哪儿出来',
             ms: 3500,
             move: true
         }
@@ -443,35 +443,35 @@ function autoBehavior() {
 
 // ===== 所有互动功能 =====
 function stick() {
-    act('stick', 15, -5, 6000, '贴贴最开心啦～');
+    act('stick', 15, -5, 6000, '贴贴最开心啦');
 }
 
 function call() {
-    act('call', 0, 0, 2000, '拍拍我干嘛呀？');
+    act('call', 0, 0, 2000, '发射鸡毛心心！');
 }
 
 function exercise() {
-    act('exercise', 5, -15, 6000, '运动一下更有精神！');
+    act('exercise', 5, -15, 6000, '运动一下更有精神喔');
 }
 
 function charge() {
-    act('charge', 30, 30, 6000, '充电中，请勿打扰～');
+    act('charge', 30, 30, 6000, '来充电啦小白~');
 }
 
 function cake() {
     if (energy >= 80) {
         act('full', 0, 0, 3000, '吃不下啦，肚肚圆圆！');
     } else {
-        act('cake', 10, 5, 4000, '好耶，有好吃的！');
+        act('cake', 10, 5, 4000, '好吃miamiamia 这饭有力气！');
     }
 }
 
 function baji() {
-    act('baji', 10, 0, 4000, '吧唧吧唧，真香！');
+    act('baji', 10, 0, 4000, '小白我被舔的凑凑的啦');
 }
 
 function baji2() {
-    act('baji2', 15, -10, 4000, '小白，这个也好吃！');
+    act('baji2', 15, -10, 4000, '小白我脑壳怎么湿湿的');
 }
 
 function appear() {
@@ -495,7 +495,7 @@ function appear() {
 }
 
 function walkDog() {
-    act('walkdog', 15, -10, 6000, '出去散散步～');
+    act('walkdog', 15, -10, 6000, '小白你慢点汪！');
 }
 
 function toggleStats() {
