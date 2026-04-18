@@ -250,7 +250,7 @@ function updateState() {
         return;
     }
 
-    const states = ['normal', 'normal', 'normal2', 'normal2', 'working2'];
+    const states = ['normal', 'normal', 'normal2', 'normal2', 'working2', 'working'];
     const randomState = states[Math.floor(Math.random() * states.length)];
     pet.className = 'pet ' + randomState;
 }
@@ -447,7 +447,7 @@ function stick() {
 }
 
 function call() {
-    act('call', 0, 0, 2000, '发射鸡毛心心！');
+    act('call', 0, 0, 3000, '发射鸡毛心心！');
 }
 
 function exercise() {
